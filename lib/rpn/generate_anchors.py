@@ -80,8 +80,10 @@ def _ratio_enum(anchor, ratios):
     w, h, x_ctr, y_ctr = _whctrs(anchor)
     size = w * h
     size_ratios = size / ratios
-    ws = np.round(np.sqrt(size_ratios))
-    hs = np.round(ws * ratios)
+    ws = np.sqrt(size_ratios).astype(np.int32)
+    hs = (ws * ratios).astype(np.int32)
+    x_ctr = 0
+    y_ctr = 0
     anchors = _mkanchors(ws, hs, x_ctr, y_ctr)
     return anchors
 

@@ -1,0 +1,31 @@
+<annotation>
+  <folder>GTSDB</folder>
+  <filename>20180822_alipalm2-thumb_down-fheart_0443_576.jpg</filename>
+  <size>
+    <width>180</width>
+    <height>320</height>
+    <depth>3</depth>
+  </size>
+  <object>
+    <name>hand</name>
+    <difficult>0</difficult>
+    <flag>1</flag>
+    <bndbox>
+      <xmin>72</xmin>
+      <ymin>158</ymin>
+      <xmax>85</xmax>
+      <ymax>175</ymax>
+    </bndbox>
+  </object>
+  <object>
+    <name>hand</name>
+    <difficult>0</difficult>
+    <flag>1</flag>
+    <bndbox>
+      <xmin>58</xmin>
+      <ymin>146</ymin>
+      <xmax>70</xmax>
+      <ymax>163</ymax>
+    </bndbox>
+  </object>
+</annotation>

@@ -1,0 +1,31 @@
+<annotation>
+  <folder>GTSDB</folder>
+  <filename>20180704___alizan___0179_111.jpg</filename>
+  <size>
+    <width>180</width>
+    <height>320</height>
+    <depth>3</depth>
+  </size>
+  <object>
+    <name>hand</name>
+    <flag>1</flag>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>56</xmin>
+      <ymin>143</ymin>
+      <xmax>73</xmax>
+      <ymax>169</ymax>
+    </bndbox>
+  </object>
+  <object>
+    <name>hand</name>
+    <flag>1</flag>
+    <difficult>0</difficult>
+    <bndbox>
+      <xmin>96</xmin>
+      <ymin>136</ymin>
+      <xmax>109</xmax>
+      <ymax>164</ymax>
+    </bndbox>
+  </object>
+</annotation>

@@ -51,7 +51,7 @@ def _get_image_blob(im):
         processed_ims.append(im)
 
     # Create a blob to hold the input images
-    blob = im_list_to_blob(processed_ims)
+    blob, image_shapes = im_list_to_blob(processed_ims)
 
     return blob, np.array(im_scale_factors)
 
@@ -152,6 +152,13 @@ def im_detect(net, im, boxes=None):
     else:
         forward_kwargs['rois'] = blobs['rois'].astype(np.float32, copy=False)
     blobs_out = net.forward(**forward_kwargs)
+
+    # for tmp_blob_key in net.blobs:
+    #     key = tmp_blob_key
+    #     tmp_blob = net.blobs[key].data
+    #     tmp_blob = tmp_blob.reshape((tmp_blob.size))
+    #     key = key.replace('/', '_')
+    #     np.savetxt('test_blob/' + key + '.txt', tmp_blob, delimiter=' ')
 
     if cfg.TEST.HAS_RPN:
         assert len(im_scales) == 1, "Only single-image batch implemented"
@@ -283,9 +290,7 @@ def test_net(net, imdb, max_per_image=100, thresh=0.05, vis=False):
                     all_boxes[j][i] = all_boxes[j][i][keep, :]
         _t['misc'].toc()
 
-        print 'im_detect: {:d}/{:d} {:.3f}s {:.3f}s' \
-              .format(i + 1, num_images, _t['im_detect'].average_time,
-                      _t['misc'].average_time)
+        print 'im_detect: {:d}/{:d} {:.3f}s {:.3f}s'.format(i + 1, num_images, _t['im_detect'].average_time,_t['misc'].average_time)
 
     det_file = os.path.join(output_dir, 'detections.pkl')
     with open(det_file, 'wb') as f:

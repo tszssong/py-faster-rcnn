@@ -1,0 +1,31 @@
+<annotation>
+  <folder>GTSDB</folder>
+  <filename>20180704___aliyearh___0243_61.jpg</filename>
+  <size>
+    <width>180</width>
+    <height>320</height>
+    <depth>3</depth>
+  </size>
+  <object>
+    <name>hand</name>
+    <difficult>0</difficult>
+    <flag>1</flag>
+    <bndbox>
+      <xmin>86</xmin>
+      <ymin>67</ymin>
+      <xmax>108</xmax>
+      <ymax>108</ymax>
+    </bndbox>
+  </object>
+  <object>
+    <name>hand</name>
+    <difficult>0</difficult>
+    <flag>1</flag>
+    <bndbox>
+      <xmin>95</xmin>
+      <ymin>125</ymin>
+      <xmax>109</xmax>
+      <ymax>153</ymax>
+    </bndbox>
+  </object>
+</annotation>

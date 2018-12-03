@@ -1,0 +1,31 @@
+<annotation>
+  <folder>GTSDB</folder>
+  <filename>20180704___alione___0128_141.jpg</filename>
+  <size>
+    <width>320</width>
+    <height>180</height>
+    <depth>3</depth>
+  </size>
+  <object>
+    <name>hand</name>
+    <difficult>0</difficult>
+    <flag>1</flag>
+    <bndbox>
+      <xmin>161</xmin>
+      <ymin>44</ymin>
+      <xmax>175</xmax>
+      <ymax>72</ymax>
+    </bndbox>
+  </object>
+  <object>
+    <name>hand</name>
+    <difficult>0</difficult>
+    <flag>1</flag>
+    <bndbox>
+      <xmin>132</xmin>
+      <ymin>100</ymin>
+      <xmax>146</xmax>
+      <ymax>128</ymax>
+    </bndbox>
+  </object>
+</annotation>

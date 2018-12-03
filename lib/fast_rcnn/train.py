@@ -14,6 +14,7 @@ from utils.timer import Timer
 import numpy as np
 import os
 
+import google.protobuf.text_format
 from caffe.proto import caffe_pb2
 import google.protobuf as pb2
 
@@ -41,6 +42,7 @@ class SolverWrapper(object):
             print 'done'
 
         self.solver = caffe.SGDSolver(solver_prototxt)
+#        self.solver = caffe.AdamSolver(solver_prototxt)
         if pretrained_model is not None:
             print ('Loading pretrained model '
                    'weights from {:s}').format(pretrained_model)

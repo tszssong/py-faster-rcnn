@@ -1,0 +1,20 @@
+<annotation>
+  <folder>GTSDB</folder>
+  <filename>20180907_iphone_singheart_0025_f1680.jpg</filename>
+  <size>
+    <width>180</width>
+    <height>320</height>
+    <depth>3</depth>
+  </size>
+  <object>
+    <name>hand</name>
+    <difficult>0</difficult>
+    <flag>1</flag>
+    <bndbox>
+      <xmin>58</xmin>
+      <ymin>83</ymin>
+      <xmax>72</xmax>
+      <ymax>105</ymax>
+    </bndbox>
+  </object>
+</annotation>

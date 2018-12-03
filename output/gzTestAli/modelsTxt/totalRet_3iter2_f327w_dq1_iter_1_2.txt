@@ -1,0 +1,8 @@
+
+testing 3iter2_f327w_dq1_iter_s with iou= 0.3CONF_THRESH
+pre nms:50
+post nms:10
+test lists:gzTest5ali.txt
+model  1w: gt =2132, re =2032, tp =2017, prec=0.9926, recall=0.9461
+best recall: 0.9461
+best recall idx: 0

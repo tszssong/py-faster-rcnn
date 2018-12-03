@@ -9,6 +9,7 @@
 
 import numpy as np
 import cv2
+from fast_rcnn.config import cfg
 
 def im_list_to_blob(ims):
     """Convert a list of images into a network input.
@@ -16,6 +17,7 @@ def im_list_to_blob(ims):
     Assumes images are already prepared (means subtracted, BGR order, ...).
     """
     max_shape = np.array([im.shape for im in ims]).max(axis=0)
+    im_shapes = np.array([im.shape for im in ims])
     num_images = len(ims)
     blob = np.zeros((num_images, max_shape[0], max_shape[1], 3),
                     dtype=np.float32)
@@ -26,10 +28,14 @@ def im_list_to_blob(ims):
     # Axis order will become: (batch elem, channel, height, width)
     channel_swap = (0, 3, 1, 2)
     blob = blob.transpose(channel_swap)
-    return blob
+    return blob, im_shapes
 
+DEBUG = False
 def prep_im_for_blob(im, pixel_means, target_size, max_size):
     """Mean subtract and scale an image for use in a blob."""
+    if DEBUG:
+        ori_im = np.copy(im)
+
     im = im.astype(np.float32, copy=False)
     im -= pixel_means
     im_shape = im.shape
@@ -41,5 +47,8 @@ def prep_im_for_blob(im, pixel_means, target_size, max_size):
         im_scale = float(max_size) / float(im_size_max)
     im = cv2.resize(im, None, None, fx=im_scale, fy=im_scale,
                     interpolation=cv2.INTER_LINEAR)
+    if DEBUG:
+        ori_im = cv2.resize(ori_im, None, None, fx=im_scale, fy=im_scale, interpolation=cv2.INTER_LINEAR)
+        cfg.TRAIN.IMAGES_LIST.append(ori_im)
 
     return im, im_scale

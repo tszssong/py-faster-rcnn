@@ -1,0 +1,31 @@
+<annotation>
+  <folder>GTSDB</folder>
+  <filename>20180716___kongyu___0056_588.jpg</filename>
+  <size>
+    <width>180</width>
+    <height>320</height>
+    <depth>3</depth>
+  </size>
+  <object>
+    <name>hand</name>
+    <difficult>0</difficult>
+    <flag>1</flag>
+    <bndbox>
+      <xmin>122</xmin>
+      <ymin>65</ymin>
+      <xmax>139</xmax>
+      <ymax>95</ymax>
+    </bndbox>
+  </object>
+  <object>
+    <name>hand</name>
+    <difficult>0</difficult>
+    <flag>1</flag>
+    <bndbox>
+      <xmin>49</xmin>
+      <ymin>74</ymin>
+      <xmax>62</xmax>
+      <ymax>103</ymax>
+    </bndbox>
+  </object>
+</annotation>

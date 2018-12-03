@@ -1,0 +1,31 @@
+<annotation>
+  <folder>GTSDB</folder>
+  <filename>20180819___alifist-zan___0005_196.jpg</filename>
+  <size>
+    <width>180</width>
+    <height>320</height>
+    <depth>3</depth>
+  </size>
+  <object>
+    <name>hand</name>
+    <difficult>0</difficult>
+    <flag>1</flag>
+    <bndbox>
+      <xmin>28</xmin>
+      <ymin>130</ymin>
+      <xmax>42</xmax>
+      <ymax>155</ymax>
+    </bndbox>
+  </object>
+  <object>
+    <name>hand</name>
+    <difficult>0</difficult>
+    <flag>1</flag>
+    <bndbox>
+      <xmin>106</xmin>
+      <ymin>136</ymin>
+      <xmax>119</xmax>
+      <ymax>158</ymax>
+    </bndbox>
+  </object>
+</annotation>

@@ -49,10 +49,10 @@ def locate_cuda():
 
     cudaconfig = {'home':home, 'nvcc':nvcc,
                   'include': pjoin(home, 'include'),
-                  'lib64': pjoin(home, 'lib64')}
-    for k, v in cudaconfig.iteritems():
-        if not os.path.exists(v):
-            raise EnvironmentError('The CUDA %s path could not be located in %s' % (k, v))
+                  'lib64': pjoin(home, 'lib/x64')}
+    #for k, v in cudaconfig.iteritems():
+    #    if not os.path.exists(v):
+    #        raise EnvironmentError('The CUDA %s path could not be located in %s' % (k, v))
 
     return cudaconfig
 CUDA = locate_cuda()
@@ -76,27 +76,26 @@ def customize_compiler_for_nvcc(self):
 
     # tell the compiler it can processes .cu
     self.src_extensions.append('.cu')
-
+    print self.src_extensions
     # save references to the default compiler_so and _comple methods
-    default_compiler_so = self.compiler_so
+    #default_compiler_so = self.compiler_so
     super = self._compile
-
     # now redefine the _compile method. This gets executed for each
     # object but distutils doesn't have the ability to change compilers
     # based on source extension: we add it.
     def _compile(obj, src, ext, cc_args, extra_postargs, pp_opts):
+        print 'in _compile'
         if os.path.splitext(src)[1] == '.cu':
             # use the cuda for .cu files
-            self.set_executable('compiler_so', CUDA['nvcc'])
+            #self.set_executable('compiler_so', CUDA['nvcc'])
             # use only a subset of the extra_postargs, which are 1-1 translated
             # from the extra_compile_args in the Extension class
+            print 'in cu'
             postargs = extra_postargs['nvcc']
-        else:
-            postargs = extra_postargs['gcc']
 
         super(obj, src, ext, cc_args, postargs, pp_opts)
         # reset the default compiler_so, which we might have changed for cuda
-        self.compiler_so = default_compiler_so
+        #self.compiler_so = default_compiler_so
 
     # inject our redefined _compile method into the class
     self._compile = _compile
@@ -105,7 +104,7 @@ def customize_compiler_for_nvcc(self):
 # run the customize_compiler
 class custom_build_ext(build_ext):
     def build_extensions(self):
-        customize_compiler_for_nvcc(self.compiler)
+        #customize_compiler_for_nvcc(self.compiler)
         build_ext.build_extensions(self)
 
 
@@ -113,38 +112,17 @@ ext_modules = [
     Extension(
         "utils.cython_bbox",
         ["utils/bbox.pyx"],
-        extra_compile_args={'gcc': ["-Wno-cpp", "-Wno-unused-function"]},
         include_dirs = [numpy_include]
     ),
     Extension(
         "nms.cpu_nms",
         ["nms/cpu_nms.pyx"],
-        extra_compile_args={'gcc': ["-Wno-cpp", "-Wno-unused-function"]},
         include_dirs = [numpy_include]
-    ),
-    Extension('nms.gpu_nms',
-        ['nms/nms_kernel.cu', 'nms/gpu_nms.pyx'],
-        library_dirs=[CUDA['lib64']],
-        libraries=['cudart'],
-        language='c++',
-        runtime_library_dirs=[CUDA['lib64']],
-        # this syntax is specific to this build system
-        # we're only going to use certain compiler args with nvcc and not with
-        # gcc the implementation of this trick is in customize_compiler() below
-        extra_compile_args={'gcc': ["-Wno-unused-function"],
-                            'nvcc': ['-arch=sm_35',
-                                     '--ptxas-options=-v',
-                                     '-c',
-                                     '--compiler-options',
-                                     "'-fPIC'"]},
-        include_dirs = [numpy_include, CUDA['include']]
     ),
     Extension(
         'pycocotools._mask',
         sources=['pycocotools/maskApi.c', 'pycocotools/_mask.pyx'],
         include_dirs = [numpy_include, 'pycocotools'],
-        extra_compile_args={
-            'gcc': ['-Wno-cpp', '-Wno-unused-function', '-std=c99']},
     ),
 ]
 

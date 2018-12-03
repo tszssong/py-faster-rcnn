@@ -1,0 +1,42 @@
+<annotation>
+<folder>VOC2007</folder>
+  <filename>20180611___alisheart___0562_frame241.jpg</filename>
+  <source>
+    <database>The VOC2007 Database</database>
+    <annotation>PASCAL VOC2007</annotation>
+    <image>flickr</image>
+    <flickrid>339821836</flickrid>
+  </source>
+  <owner>
+    <flickrid>deepwarren</flickrid>
+    <name>allen</name>
+  </owner>
+  <size>
+    <width>180</width>
+    <height>320</height>
+    <depth>3</depth>
+  </size>
+  <segmented>0</segmented>
+<object>
+	<name>hand</name>
+	<pose>Unspecified</pose>
+	<truncated>0</truncated>
+	<difficult>0</difficult>
+	<bndbox>
+		<xmin>11</xmin>
+		<ymin>73</ymin>
+		<xmax>29</xmax>
+		<ymax>95</ymax>
+	</bndbox>
+</object><object>
+	<name>hand</name>
+	<pose>Unspecified</pose>
+	<truncated>0</truncated>
+	<difficult>0</difficult>
+	<bndbox>
+		<xmin>68</xmin>
+		<ymin>75</ymin>
+		<xmax>81</xmax>
+		<ymax>97</ymax>
+	</bndbox>
+</object></annotation>

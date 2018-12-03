@@ -23,20 +23,44 @@ class RoIDataLayer(caffe.Layer):
     def _shuffle_roidb_inds(self):
         """Randomly permute the training roidb."""
         if cfg.TRAIN.ASPECT_GROUPING:
-            widths = np.array([r['width'] for r in self._roidb])
-            heights = np.array([r['height'] for r in self._roidb])
-            horz = (widths >= heights)
-            vert = np.logical_not(horz)
-            horz_inds = np.where(horz)[0]
-            vert_inds = np.where(vert)[0]
-            inds = np.hstack((
-                np.random.permutation(horz_inds),
-                np.random.permutation(vert_inds)))
-            inds = np.reshape(inds, (-1, 2))
-            row_perm = np.random.permutation(np.arange(inds.shape[0]))
-            inds = np.reshape(inds[row_perm, :], (-1,))
+            print 'shuffle roidb better'
+            fg_inds_bool = np.array([np.any(r['flags'] == 1) for r in self._roidb])
+            bg_inds_bool = np.array([np.all(r['flags'] == 0) for r in self._roidb])
+            fg_inds = np.where(fg_inds_bool)[0]
+            bg_inds = np.where(bg_inds_bool)[0]
+            fg_perm = np.random.permutation(np.arange(fg_inds.shape[0]))
+            bg_perm = np.random.permutation(np.arange(bg_inds.shape[0]))
+            fg_random_inds = fg_inds[fg_perm]
+            bg_random_inds = bg_inds[bg_perm]
+            num_images = cfg.TRAIN.IMS_PER_BATCH
+            fg_ratio = float(len(fg_random_inds)) / (len(fg_random_inds) + len(bg_random_inds))
+            fg_per_batch = int(fg_ratio * num_images)
+            if fg_per_batch == 0:
+                fg_per_batch = 1
+            bg_per_batch = num_images - fg_per_batch
+            assert fg_per_batch >0
+            assert bg_per_batch >= 0
+            print 'FG NUM ', fg_per_batch, 'BG NUM ', bg_per_batch
+            inds = np.zeros((len(self._roidb)), dtype=np.int32)
+            cur_fg = 0
+            cur_bg = 0
+            cur_inds = 0
+            total_assign = len(inds) / num_images
+            rest_assign = len(inds) % num_images
+            for i in xrange(total_assign):
+                if cur_fg + fg_per_batch > len(fg_random_inds):
+                    cur_fg = 0
+                if cur_bg + bg_per_batch > len(bg_random_inds):
+                    cur_bg = 0
+                inds[cur_inds:cur_inds + fg_per_batch] = fg_random_inds[cur_fg:cur_fg + fg_per_batch]
+                inds[cur_inds + fg_per_batch: cur_inds + num_images] = bg_random_inds[cur_bg:cur_bg + bg_per_batch]
+                cur_fg += fg_per_batch
+                cur_bg += bg_per_batch
+                cur_inds += num_images
+            inds[cur_inds:cur_inds + rest_assign] = fg_random_inds[0:rest_assign]
             self._perm = inds
         else:
+            print 'shuffle roidb'
             self._perm = np.random.permutation(np.arange(len(self._roidb)))
         self._cur = 0
 
@@ -62,12 +86,53 @@ class RoIDataLayer(caffe.Layer):
             minibatch_db = [self._roidb[i] for i in db_inds]
             return get_minibatch(minibatch_db, self._num_classes)
 
+    def _balance_roidb(self, roidb):
+        class_dict = {}
+        bg_inds = []
+        r_index = 0
+        for r in roidb:
+            assert len(np.unique(r['flags'])) == 1
+            if r['flags'][0] == 0:
+                bg_inds.append(r_index)
+                r_index += 1
+                continue
+            #assert len(np.unique(r['gt_classes'])) == 1
+            if np.unique(r['gt_classes'])[0] not in class_dict:
+                class_dict[np.unique(r['gt_classes'])[0]] = [r_index]
+            else:
+                class_dict[np.unique(r['gt_classes'])[0]].append(r_index)
+            r_index += 1
+        max_v = 0
+        max_key = None
+        for key in class_dict:
+            print 'before', key, len(class_dict[key])
+            if max_v < len(class_dict[key]):
+                max_v = len(class_dict[key])
+                max_key = key
+        for key in class_dict:
+            if key != max_key:
+                add_num = max_v - len(class_dict[key])
+                ori_len = len(class_dict[key])
+                for _ in xrange(add_num):
+                    class_dict[key].append(class_dict[key][np.random.randint(0, ori_len)])
+        balance_roidb = []
+        for key in class_dict:
+            print 'after', key, len(class_dict[key])
+            for roi_index in class_dict[key]:
+                balance_roidb.append(roidb[roi_index])
+        for ind in bg_inds:
+            balance_roidb.append(roidb[ind])
+        return balance_roidb
+
     def set_roidb(self, roidb):
+        """balance roidb"""
+        print 'begin balance roidb...'
+        #roidb = self._balance_roidb(roidb)
+        print 'end balance roidb'
         """Set the roidb to be used by this layer during training."""
         self._roidb = roidb
-        self._shuffle_roidb_inds()
         if cfg.TRAIN.USE_PREFETCH:
-            self._blob_queue = Queue(10)
+            self._blob_queue = Queue(15)
             self._prefetch_process = BlobFetcher(self._blob_queue,
                                                  self._roidb,
                                                  self._num_classes)
@@ -79,12 +144,14 @@ class RoIDataLayer(caffe.Layer):
                 self._prefetch_process.join()
             import atexit
             atexit.register(cleanup)
+        else:
+            self._shuffle_roidb_inds()
 
     def setup(self, bottom, top):
         """Setup the RoIDataLayer."""
 
         # parse the layer parameter string, which must be valid YAML
-        layer_params = yaml.load(self.param_str_)
+        layer_params = yaml.load(self.param_str)
 
         self._num_classes = layer_params['num_classes']
 
@@ -104,6 +171,10 @@ class RoIDataLayer(caffe.Layer):
 
             top[idx].reshape(1, 4)
             self._name_to_top_map['gt_boxes'] = idx
+            idx += 1
+
+            top[idx].reshape(1, 1)
+            self._name_to_top_map['flags'] = idx
             idx += 1
         else: # not using RPN
             # rois blob: holds R regions of interest, each is a 5-tuple
@@ -173,8 +244,46 @@ class BlobFetcher(Process):
 
     def _shuffle_roidb_inds(self):
         """Randomly permute the training roidb."""
-        # TODO(rbg): remove duplicated code
-        self._perm = np.random.permutation(np.arange(len(self._roidb)))
+        if cfg.TRAIN.ASPECT_GROUPING:
+            print 'shuffle roidb better'
+            fg_inds_bool = np.array([np.any(r['flags'] == 1) for r in self._roidb])
+            bg_inds_bool = np.array([np.all(r['flags'] == 0) for r in self._roidb])
+            fg_inds = np.where(fg_inds_bool)[0]
+            bg_inds = np.where(bg_inds_bool)[0]
+            fg_perm = np.random.permutation(np.arange(fg_inds.shape[0]))
+            bg_perm = np.random.permutation(np.arange(bg_inds.shape[0]))
+            fg_random_inds = fg_inds[fg_perm]
+            bg_random_inds = bg_inds[bg_perm]
+            num_images = cfg.TRAIN.IMS_PER_BATCH
+            fg_ratio = float(len(fg_random_inds)) / (len(fg_random_inds) + len(bg_random_inds))
+            fg_per_batch = int(fg_ratio * num_images)
+            if fg_per_batch == 0:
+                fg_per_batch = 1
+            bg_per_batch = num_images - fg_per_batch
+            assert fg_per_batch >0
+            assert bg_per_batch >= 0
+            print 'FG NUM ', fg_per_batch, 'BG NUM ', bg_per_batch
+            inds = np.zeros((len(self._roidb)), dtype=np.int32)
+            cur_fg = 0
+            cur_bg = 0
+            cur_inds = 0
+            total_assign = len(inds) / num_images
+            rest_assign = len(inds) % num_images
+            for i in xrange(total_assign):
+                if cur_fg + fg_per_batch > len(fg_random_inds):
+                    cur_fg = 0
+                if cur_bg + bg_per_batch > len(bg_random_inds):
+                    cur_bg = 0
+                inds[cur_inds:cur_inds + fg_per_batch] = fg_random_inds[cur_fg:cur_fg + fg_per_batch]
+                inds[cur_inds + fg_per_batch: cur_inds + num_images] = bg_random_inds[cur_bg:cur_bg + bg_per_batch]
+                cur_fg += fg_per_batch
+                cur_bg += bg_per_batch
+                cur_inds += num_images
+            inds[cur_inds:cur_inds + rest_assign] = fg_random_inds[0:rest_assign]
+            self._perm = inds
+        else:
+            print 'shuffle roidb'
+            self._perm = np.random.permutation(np.arange(len(self._roidb)))
         self._cur = 0
 
     def _get_next_minibatch_inds(self):
